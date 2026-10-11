@@ -2,30 +2,46 @@ import { useEffect, useState } from 'react'
 
 const BRAND_NAME = 'Selections Technologies'
 const TYPE_SPEED_MS = 55
+const DELETE_SPEED_MS = 32
+const HOLD_FULL_MS = 1500
+const HOLD_EMPTY_MS = 500
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 export default function Hero() {
-  const [typed, setTyped] = useState(() => (prefersReducedMotion() ? BRAND_NAME : ''))
-  const [typing, setTyping] = useState(() => !prefersReducedMotion())
+  const [reduceMotion] = useState(prefersReducedMotion)
+  const [typed, setTyped] = useState(() => (reduceMotion ? BRAND_NAME : ''))
 
+  // Loops forever: type the brand name out, hold, delete it, hold, repeat.
   useEffect(() => {
-    if (prefersReducedMotion()) return
+    if (reduceMotion) return
 
-    let i = 0
-    const id = setInterval(() => {
-      i += 1
+    let timeoutId
+
+    function typeForward(i) {
       setTyped(BRAND_NAME.slice(0, i))
-      if (i >= BRAND_NAME.length) {
-        clearInterval(id)
-        setTyping(false)
+      if (i < BRAND_NAME.length) {
+        timeoutId = setTimeout(() => typeForward(i + 1), TYPE_SPEED_MS)
+      } else {
+        timeoutId = setTimeout(() => typeBackward(i), HOLD_FULL_MS)
       }
-    }, TYPE_SPEED_MS)
+    }
 
-    return () => clearInterval(id)
-  }, [])
+    function typeBackward(i) {
+      setTyped(BRAND_NAME.slice(0, i))
+      if (i > 0) {
+        timeoutId = setTimeout(() => typeBackward(i - 1), DELETE_SPEED_MS)
+      } else {
+        timeoutId = setTimeout(() => typeForward(0), HOLD_EMPTY_MS)
+      }
+    }
+
+    typeForward(0)
+
+    return () => clearTimeout(timeoutId)
+  }, [reduceMotion])
 
   return (
     <div className="hero">
@@ -33,7 +49,7 @@ export default function Hero() {
         <h1>
           Seamless Meetings,
           <br />
-          Powered by <span className={typing ? 'typewriter-cursor' : ''}>{typed}</span>
+          Powered by <span className={reduceMotion ? '' : 'typewriter-cursor'}>{typed}</span>
         </h1>
         <p>Start or join a secure video meeting in seconds — no downloads, no accounts needed.</p>
       </div>

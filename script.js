@@ -1,4 +1,4 @@
-// ---------- HitroTech Meet: form validation + Jitsi integration ----------
+// ---------- Selections Technologies Meet: form validation + Jitsi integration ----------
 
 const roomInput = document.getElementById('roomName');
 const nameInput = document.getElementById('displayName');
@@ -15,17 +15,35 @@ const NAME_PATTERN = /^[a-zA-Z\s'.-]+$/;
 roomInput.addEventListener('input', () => {
   const cleaned = roomInput.value.replace(/[^a-zA-Z0-9-]/g, '');
   if (cleaned !== roomInput.value) roomInput.value = cleaned;
-  clearError(roomInput, roomError);
+  liveValidate(roomInput, roomError, validateRoom);
 });
 
-nameInput.addEventListener('input', () => clearError(nameInput, nameError));
+nameInput.addEventListener('input', () => liveValidate(nameInput, nameError, validateName));
+
+// Validates on every keystroke once the user has typed something, instead of
+// waiting for submit — but withholds the "required" message on an empty,
+// untouched field so it doesn't flag errors before the user starts typing.
+function liveValidate(input, errorEl, validatorFn) {
+  const value = input.value.trim();
+  if (!value) { clearError(input, errorEl); return; }
+  const message = validatorFn(value);
+  if (message) setError(input, errorEl, message);
+  else setValid(input, errorEl);
+}
 
 function clearError(input, errorEl) {
+  input.classList.remove('invalid', 'valid');
+  errorEl.textContent = '';
+}
+
+function setValid(input, errorEl) {
   input.classList.remove('invalid');
+  input.classList.add('valid');
   errorEl.textContent = '';
 }
 
 function setError(input, errorEl, message) {
+  input.classList.remove('valid');
   input.classList.add('invalid');
   errorEl.textContent = message;
 }
@@ -56,8 +74,8 @@ joinBtn.addEventListener('click', () => {
   clearError(roomInput, roomError);
   clearError(nameInput, nameError);
 
-  if (roomMsg) setError(roomInput, roomError, roomMsg);
-  if (nameMsg) setError(nameInput, nameError, nameMsg);
+  if (roomMsg) setError(roomInput, roomError, roomMsg); else setValid(roomInput, roomError);
+  if (nameMsg) setError(nameInput, nameError, nameMsg); else setValid(nameInput, nameError);
   if (roomMsg || nameMsg) return;
 
   startMeeting(room, name);
@@ -74,13 +92,13 @@ joinBtn.addEventListener('click', () => {
 // Jitsi explicitly disconnects embedded calls after 5 minutes ("embedding
 // meet.jit.si is only meant for demo purposes"). Instead, we hand off to
 // meet.jit.si directly (full navigation, not an iframe), which has no such
-// restriction. The HitroTech branding lives on this landing page; the call
-// itself runs on Jitsi's own site.
+// restriction. The Selections Technologies branding lives on this landing
+// page; the call itself runs on Jitsi's own site.
 function startMeeting(room, name) {
   joinBtn.disabled = true;
   joinBtnText.textContent = 'Redirecting to your meeting…';
 
-  const roomId = 'HitroTechMeet-' + room;
+  const roomId = 'SelectionsTechMeet-' + room;
   const jitsiUrl =
     'https://meet.jit.si/' +
     encodeURIComponent(roomId) +
@@ -88,3 +106,28 @@ function startMeeting(room, name) {
 
   window.location.href = jitsiUrl;
 }
+
+// ---------- Hero typewriter ----------
+// Types the brand name into the hero heading on load; skipped in favor of
+// static text when the user has requested reduced motion.
+function typewriterEffect(el, text, speed) {
+  if (!el) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = text;
+    return;
+  }
+  el.textContent = '';
+  el.classList.add('typewriter-cursor');
+  let i = 0;
+  (function tick() {
+    el.textContent = text.slice(0, i);
+    i++;
+    if (i <= text.length) {
+      setTimeout(tick, speed);
+    } else {
+      el.classList.remove('typewriter-cursor');
+    }
+  })();
+}
+
+typewriterEffect(document.getElementById('brandType'), 'Selections Technologies', 55);

@@ -4,7 +4,7 @@ A lightweight, branded video conferencing page for Selections Technologies — s
 
 ## Tech Stack
 
-- **React 18 + Vite** — component-based UI with a fast dev server and a static production build
+- **React 18 + Vite + React Router** — component-based, multi-page UI with a fast dev server and a static production build
 - **[Jitsi Meet External API](https://jitsi.github.io/handbook/docs/dev-guide/dev-guide-iframe)** — powers the actual video/audio calling via Jitsi's free public server (`meet.jit.si`)
 - Deployed as a static site on **Netlify**
 
@@ -13,17 +13,24 @@ A lightweight, branded video conferencing page for Selections Technologies — s
 ```
 meeting_project/
 ├── index.html                  # Vite entry (mounts #root)
+├── netlify.toml                # build settings + SPA fallback redirect
 ├── src/
 │   ├── main.jsx                 # React entry point
-│   ├── App.jsx                  # top-level layout
+│   ├── App.jsx                  # router shell: TopBar + Header + <Routes> + Footer
 │   ├── index.css                # all styling (brand palette, solid colors, animations)
-│   └── components/
-│       ├── TopBar.jsx           # email + UK/PK phone contact bar
-│       ├── Header.jsx           # logo + Team nav link
-│       ├── Hero.jsx             # heading with typewriter effect + illustration
-│       ├── JoinForm.jsx         # room/name fields with real-time validation
-│       ├── Badges.jsx           # feature badges
-│       └── Footer.jsx           # copyright + links
+│   ├── components/
+│   │   ├── TopBar.jsx           # email + UK/PK phone contact bar
+│   │   ├── Header.jsx           # logo + full nav (with mobile hamburger menu)
+│   │   ├── Hero.jsx             # heading with looping typewriter effect + illustration
+│   │   ├── JoinForm.jsx         # room/name fields with real-time validation
+│   │   ├── Badges.jsx           # feature badges
+│   │   └── Footer.jsx           # multi-column footer (brand, links, contact)
+│   └── pages/
+│       ├── HomePage.jsx         # "/" — the meeting join flow
+│       ├── AboutPage.jsx        # "/about" — mission, vision, process, why-us
+│       ├── ServicesPage.jsx     # "/services" — all 14 services + industries + toolkit
+│       ├── ContactPage.jsx      # "/contact" — static contact details, no form
+│       └── TeamPage.jsx         # "/team" — links out to the official team page
 ├── package.json
 ├── vite.config.js
 └── README.md
@@ -34,8 +41,12 @@ meeting_project/
 1. User enters a **room name** and their **display name** on the landing page.
 2. Both fields are validated **in real time** as the user types (required, length limits, allowed characters), with inline success/error states.
 3. On submit, the browser is **redirected to `meet.jit.si`** with a room scoped to `SelectionsTechMeet-<room>`, so it doesn't collide with unrelated public rooms.
-4. The **Team** link (header and footer) redirects to [selectionstechnologies.com/team](https://selectionstechnologies.com/team).
-5. No backend, database, or account system — Jitsi's public infrastructure handles the actual video/audio.
+4. **About**, **Services**, **Contact** and **Team** are real in-app pages (React Router), reachable from the header nav and footer. Team content is minimal — full bios live on [selectionstechnologies.com/team](https://selectionstechnologies.com/team), linked from that page.
+5. No backend, database, or account system — Jitsi's public infrastructure handles the actual video/audio, and the Contact page is static info (no submitting form).
+
+### Why a `netlify.toml` redirect rule?
+
+With multiple client-side routes (`/about`, `/services`, etc.), a direct visit or page refresh on any route other than `/` would 404 on a static host, since there's no real `about/index.html` file on disk — React Router only takes over once `index.html` has loaded. The `[[redirects]]` rule in `netlify.toml` serves `index.html` for every path so the client-side router can handle it.
 
 ### Why a redirect instead of an embedded iframe?
 

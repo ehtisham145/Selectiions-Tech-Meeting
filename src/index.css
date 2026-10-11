@@ -54,6 +54,7 @@ body {
 
 /* ---------- Header ---------- */
 header {
+  position: relative;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -63,6 +64,7 @@ header {
   border-bottom: 1px solid var(--border);
   background: var(--card);
 }
+.header-brand { display: flex; align-items: center; gap: 14px; }
 .logo-text {
   font-size: 28px;
   font-weight: 800;
@@ -94,7 +96,14 @@ header {
 }
 .nav-toggle span { width: 22px; height: 2px; background: var(--text); display: block; border-radius: 1px; }
 
-.site-nav { margin-left: auto; display: flex; gap: 22px; }
+.site-nav {
+  display: flex;
+  gap: 22px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
 .site-nav a {
   color: var(--muted);
   text-decoration: none;
@@ -111,11 +120,12 @@ header {
   .logo-text { font-size: 22px; }
   .nav-toggle { display: flex; }
   .site-nav {
+    position: static;
+    transform: none;
     display: none;
     width: 100%;
     flex-direction: column;
     gap: 2px;
-    margin-left: 0;
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid var(--border);

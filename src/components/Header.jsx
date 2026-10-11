@@ -14,11 +14,13 @@ export default function Header() {
 
   return (
     <header>
-      <Link to="/" className="logo-text" onClick={() => setOpen(false)}>
-        <span className="brand-primary">Selections</span>
-        <span className="brand-accent">Tech</span>
-      </Link>
-      <div className="logo-suffix">Meet</div>
+      <div className="header-brand">
+        <Link to="/" className="logo-text" onClick={() => setOpen(false)}>
+          <span className="brand-primary">Selections</span>
+          <span className="brand-accent">Tech</span>
+        </Link>
+        <div className="logo-suffix">Meet</div>
+      </div>
 
       <button
         className="nav-toggle"
